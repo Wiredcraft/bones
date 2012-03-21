@@ -4,19 +4,19 @@ var HTTPServer = require('express').HTTPServer;
 var middleware = require('..').middleware;
 
 module.exports = Server;
-function Server(plugin) {
+function Server(plugin, args) {
     HTTPServer.call(this, []);
     this.plugin = plugin;
-    this.initialize(plugin);
-    this.conclude(plugin);
+    this.initialize(plugin, args);
+    this.conclude(plugin, args);
 };
 
 Server.prototype.__proto__ = HTTPServer.prototype;
 
 _.extend(Server.prototype, Backbone.Events, {
-    initialize : function(plugin) {},
+    initialize : function(plugin, args) {},
 
-    conclude: function(plugin) {
+    conclude: function(plugin, args) {
         // Add catchall 404 middleware and error handler for root servers.
         if (this.port) {
             this.use(middleware.notFound());
