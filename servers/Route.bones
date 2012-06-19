@@ -79,10 +79,10 @@ server.prototype.initializeAssets = function(app) {
 
 server.prototype.initializeModels = function(app) {
     this.models = app.models;
-    _.bindAll(this, 'loadModel', 'getModel', 'fillModel', 'saveModel', 'delModel', 'loadCollection');
+    _.bindAll(this, 'loadModel', 'getModel', 'saveModel', 'delModel', 'loadCollection');
     this.get('/api/:model/:id', this.loadModel, this.getModel);
     this.post('/api/:model', this.loadModel, this.saveModel);
-    this.put('/api/:model/:id', this.loadModel, this.fillModel, this.saveModel);
+    this.put('/api/:model/:id', this.loadModel, this.saveModel);
     this.del('/api/:model/:id', this.loadModel, this.delModel);
     this.get('/api/:collection', this.loadCollection.bind(this));
 };
@@ -120,19 +120,6 @@ server.prototype.getModel = function(req, res, next) {
     req.model.fetch({
         success: function(model, resp) {
             res.send(resp, headers);
-        },
-        error: function(model, err) {
-            err = err instanceof Object ? err.toString() : err;
-            next(new Error.HTTP(err, 404));
-        }
-    });
-};
-
-server.prototype.fillModel = function(req, res, next) {
-    if (!req.model) return next();
-    req.model.fetch({
-        success: function(model, resp) {
-            next();
         },
         error: function(model, err) {
             err = err instanceof Object ? err.toString() : err;
