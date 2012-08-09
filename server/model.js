@@ -19,6 +19,11 @@ Backbone.Model.register = function(server) {
     server.models[this.title] = this;
 };
 
+// Override in order to authenticate a request for a model.
+Backbone.Model.prototype.access = function(req, res) {
+    return this;
+};
+
 Backbone.Model.prototype.toString = function() {
     return '[Model ' + this.constructor.title + ']';
 };

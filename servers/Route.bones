@@ -79,51 +79,80 @@ server.prototype.initializeAssets = function(app) {
 
 server.prototype.initializeModels = function(app) {
     this.models = app.models;
-    _.bindAll(this, 'loadModel', 'getModel', 'saveModel', 'delModel', 'loadCollection');
-    this.get('/api/:model/:id', [this.loadModel, this.getModel]);
-    this.post('/api/:model', [this.loadModel, this.saveModel]);
-    this.put('/api/:model/:id', [this.loadModel, this.saveModel]);
-    this.del('/api/:model/:id', [this.loadModel, this.delModel]);
-    this.get('/api/:collection', this.loadCollection.bind(this));
+    _.bindAll(this, 'loadModel', 'accessModel','getModel', 'fillModel', 'saveModel', 'delModel', 'loadCollection', 'accessCollection', 'getCollection');
+    this.get('/api/:model/:id', this.loadModel, this.fillModel, this.accessModel, this.getModel);
+    this.post('/api/:model', this.loadModel, this.accessModel, this.saveModel);
+    this.put('/api/:model/:id', this.loadModel, this.fillModel, this.accessModel, this.saveModel);
+    this.del('/api/:model/:id', this.loadModel, this.fillModel, this.accessModel, this.delModel);
+    this.get('/api/:collection', this.loadCollection, this.accessCollection, this.getCollection);
 };
 
 server.prototype.loadCollection = function(req, res, next) {
     var name = Bones.utils.pluralize(req.params.collection);
     if (name in this.models) {
-        // Pass any querystring paramaters to the collection.
+        // Pass any querystring parameters to the collection.
         req.collection = new this.models[name]([], req.query);
-        req.collection.fetch({
-            success: function(collection, resp) {
-                res.send(resp, headers);
-            },
-            error: function(collection, err) {
-                var error = err instanceof Object ? err.message : err;
-                next(new Error.HTTP(error, err && err.status || 500));
-            }
-        });
-    } else {
-        next();
     }
+    return next();
+};
+
+server.prototype.getCollection = function(req, res, next) {
+    if (!req.collection) { return next(); }
+    req.collection.fetch({
+        success: function(collection, resp) {
+            res.send(resp, headers);
+        },
+        error: function(collection, err) {
+            err = err instanceof Object ? err.toString() : err;
+            next(new Error.HTTP(err, 500));
+        }
+    });
 };
 
 server.prototype.loadModel = function(req, res, next) {
     var name = req.params.model;
     if (name in this.models) {
-        // Pass any querystring paramaters to the model.
+        // Pass any querystring parameters to the model.
         req.model = new this.models[name]({ id: req.params.id }, req.query);
     }
     next();
 };
 
+/*
+ * Check the query should be allowed access to the given model.
+ */
+server.prototype.accessModel = function(req, res, next) {
+    if (!req.model) return next();
+    if (req.model.access(req, res)) {
+        return next();
+    } else {
+        return next(new Error.HTTP(403));
+    }
+};
+
+server.prototype.accessCollection = function(req, res, next) {
+    if (!req.collection) { return next(); }
+    if (req.collection.access(req, res)) {
+        return next();
+    } else {
+        return next(new Error.HTTP(403));
+    }
+};
+
 server.prototype.getModel = function(req, res, next) {
+    if (!req.model) return next();
+    res.send(resp, headers);
+};
+
+server.prototype.fillModel = function(req, res, next) {
     if (!req.model) return next();
     req.model.fetch({
         success: function(model, resp) {
-            res.send(resp, headers);
+            next();
         },
         error: function(model, err) {
-            var error = err instanceof Object ? err.message : err;
-            next(new Error.HTTP(error, err && err.status || 404));
+            err = err instanceof Object ? err.toString() : err;
+            next(new Error.HTTP(err, 404));
         }
     });
 };
@@ -135,8 +164,8 @@ server.prototype.saveModel = function(req, res, next) {
             res.send(resp, headers);
         },
         error: function(model, err) {
-            var error = err instanceof Object ? err.message : err;
-            next(new Error.HTTP(error, err && err.status || 409));
+            err = err instanceof Object ? err.toString() : err;
+            next(new Error.HTTP(err, 409));
         }
     });
 };
@@ -148,8 +177,8 @@ server.prototype.delModel = function(req, res, next) {
             res.send({}, headers);
         },
         error: function(model, err) {
-            var error = err instanceof Object ? err.message : err;
-            next(new Error.HTTP(error, err && err.status || 409));
+            err = err instanceof Object ? err.toString() : err;
+            next(new Error.HTTP(err, 409));
         }
     });
 };

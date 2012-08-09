@@ -21,3 +21,12 @@ Backbone.Collection.register = function(app) {
 Backbone.Collection.prototype.toString = function() {
     return '[Collection ' + this.constructor.title + ']';
 };
+
+Backbone.Collection.prototype.access = function(req, res) {
+    if (this.model) {
+        var model = new this.model();
+        return model.access(req, res);
+    }
+    return this;
+};
+
