@@ -123,6 +123,7 @@ server.prototype.loadModel = function(req, res, next) {
  */
 server.prototype.accessModel = function(req, res, next) {
     if (!req.model) return next();
+    console.log('[debug accessModel] now trying to access: ', req.model);
     if (req.model.access(req, res)) {
         return next();
     } else {
@@ -141,7 +142,7 @@ server.prototype.accessCollection = function(req, res, next) {
 
 server.prototype.getModel = function(req, res, next) {
     if (!req.model) return next();
-    res.send(resp, headers);
+    res.send(req.model, headers);
 };
 
 server.prototype.fillModel = function(req, res, next) {
