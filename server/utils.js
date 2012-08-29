@@ -34,8 +34,8 @@ if (tty.isatty(process.stdout.fd) && tty.isatty(process.stderr.fd)) {
     utils.colorize = function(text) { return text; };
 }
 
-
-// Load client-side wrappers
+// Load prefix and suffix JS files into an object, which can then be used as
+// wrappers.
 // TODO: optionally compact the code.
 utils.loadWrappers = function(wrapperDir) {
     var wrappers = {};
@@ -49,6 +49,8 @@ utils.loadWrappers = function(wrapperDir) {
     });
     return wrappers;
 };
+
+// Load client-side wrappers
 var wrappers = utils.loadWrappers(path.join(__dirname, '../client'));
 
 // Remove common prefix between the working directory and filename so that we don't

@@ -33,7 +33,7 @@ require.extensions['.js'] = function(module, filename) {
     if (/^.+\.bones\.js$/.test(filename))
         return require.extensions['.bones.js'](module,filename);
     return _requirejs(module, filename);
-}
+};
 // Backwards compatiblity for deprecated `.bones` extension.
 require.extensions['.bones'] = require.extensions['.bones.js'];
 
