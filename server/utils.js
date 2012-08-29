@@ -36,16 +36,20 @@ if (tty.isatty(process.stdout.fd) && tty.isatty(process.stderr.fd)) {
 
 
 // Load client-side wrappers
-var wrappers = {};
-var wrapperDir = path.join(__dirname, '../client');
-fs.readdirSync(wrapperDir).forEach(function(name) {
-    var match = name.match(/^(.+)\.(prefix|suffix)\.js$/);
-    if (match) {
-        wrappers[match[1]] = wrappers[match[1]] || {};
-        wrappers[match[1]][match[2]] =
-            fs.readFileSync(path.join(wrapperDir, name), 'utf8');
-    }
-});
+// TODO: optionally compact the code.
+utils.loadWrappers = function(wrapperDir) {
+    var wrappers = {};
+    fs.readdirSync(wrapperDir).forEach(function(name) {
+        var match = name.match(/^(.+)\.(prefix|suffix)\.js$/);
+        if (match) {
+            wrappers[match[1]] = wrappers[match[1]] || {};
+            wrappers[match[1]][match[2]] =
+                fs.readFileSync(path.join(wrapperDir, name), 'utf8');
+        }
+    });
+    return wrappers;
+};
+var wrappers = utils.loadWrappers(path.join(__dirname, '../client'));
 
 // Remove common prefix between the working directory and filename so that we don't
 // leak information about the directory structure.
