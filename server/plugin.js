@@ -9,10 +9,11 @@ var Bones = require(path.join(__dirname, '../'));
 var utils = Bones.utils;
 
 // Load wrappers
-var wrappers = utils.loadWrappers(__dirname);
+utils.wrappersServer = utils.loadWrappers(__dirname);
 
 require.extensions['.bones.js'] = function(module, filename) {
     var content = fs.readFileSync(filename, 'utf8');
+    var wrappers = utils.wrappersServer;
     var kind = utils.singularize(path.basename(path.dirname(filename)));
 
     wrappers[kind] = wrappers[kind] || {};

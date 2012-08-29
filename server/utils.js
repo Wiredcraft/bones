@@ -51,7 +51,7 @@ utils.loadWrappers = function(wrapperDir) {
 };
 
 // Load client-side wrappers
-var wrappers = utils.loadWrappers(path.join(__dirname, '../client'));
+utils.wrappersClient = utils.loadWrappers(path.join(__dirname, '../client'));
 
 // Remove common prefix between the working directory and filename so that we don't
 // leak information about the directory structure.
@@ -67,6 +67,7 @@ utils.removePrefix = function(str) {
 
 
 utils.wrapClientFile = function(content, filename) {
+    var wrappers = utils.wrappersClient;
     var kind = utils.singularize(path.basename(path.dirname(filename)));
     var name = path.basename(filename).replace(/\..+$/, '');
     var file = utils.removePrefix(filename);
