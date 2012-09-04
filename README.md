@@ -15,9 +15,10 @@ and on the [concepts](https://github.com/developmentseed/bones/wiki/Plugin-Archi
 
 ## Testing
 
-To run the test suite, type `npm install` and after that `npm test`.
+To run the test suite, install [mocha](http://visionmedia.github.com/mocha/) and type `npm test`.
+
+Code coverages tests require [jscoverage](https://github.com/visionmedia/node-jscoverage). To generate a report run `npm run-script coverage`.
 
 ## License
 
 Bones is [BSD licensed](https://github.com/developmentseed/bones/raw/master/LICENSE).
-

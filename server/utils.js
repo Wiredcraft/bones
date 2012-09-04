@@ -34,18 +34,24 @@ if (tty.isatty(process.stdout.fd) && tty.isatty(process.stderr.fd)) {
     utils.colorize = function(text) { return text; };
 }
 
+// Load prefix and suffix JS files into an object, which can then be used as
+// wrappers.
+// TODO: optionally compact the code.
+utils.loadWrappers = function(wrapperDir) {
+    var wrappers = {};
+    fs.readdirSync(wrapperDir).forEach(function(name) {
+        var match = name.match(/^(.+)\.(prefix|suffix)\.js$/);
+        if (match) {
+            wrappers[match[1]] = wrappers[match[1]] || {};
+            wrappers[match[1]][match[2]] =
+                fs.readFileSync(path.join(wrapperDir, name), 'utf8');
+        }
+    });
+    return wrappers;
+};
 
 // Load client-side wrappers
-var wrappers = {};
-var wrapperDir = path.join(__dirname, '../client');
-fs.readdirSync(wrapperDir).forEach(function(name) {
-    var match = name.match(/^(.+)\.(prefix|suffix)\.js$/);
-    if (match) {
-        wrappers[match[1]] = wrappers[match[1]] || {};
-        wrappers[match[1]][match[2]] =
-            fs.readFileSync(path.join(wrapperDir, name), 'utf8');
-    }
-});
+utils.wrappersClient = utils.loadWrappers(path.join(__dirname, '../client'));
 
 // Remove common prefix between the working directory and filename so that we don't
 // leak information about the directory structure.
@@ -61,6 +67,7 @@ utils.removePrefix = function(str) {
 
 
 utils.wrapClientFile = function(content, filename) {
+    var wrappers = utils.wrappersClient;
     var kind = utils.singularize(path.basename(path.dirname(filename)));
     var name = path.basename(filename).replace(/\..+$/, '');
     var file = utils.removePrefix(filename);
